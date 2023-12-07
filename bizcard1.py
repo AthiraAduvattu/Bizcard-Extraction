@@ -189,7 +189,40 @@ pip install streamlit-option-menu
 #     pin_code = st.text_input("Pin_Code", result[9])
 # 
 # 
-#     #if st.button(":blue[Commit changes to DB]"):
+#     if st.button(":blue[Commit changes to DB]"):
+        # Update the information for the selected business card in the database
+        cursor.execute("""UPDATE card_data SET company_name=?,card_holder=?,designation=?,mob_no=?,email=?,website=?,area=?,city=?,state=?,pincode=?
+                        WHERE card_holder=?""", (company_name, card_holder, designation, mobile_number, email, website, area, city, state, pin_code,
+        selected_card))
+        conn.commit()
+        st.success("Information updated in database successfully.")
+
+        st.write("The updated data:")
+        cursor.execute("""select company_name,card_holder,designation,mob_no,email,website,area,city,state,pincode from card_data where card_holder=?""",(card_holder,))
+        result=pd.DataFrame(cursor.fetchall(),columns=['company_name','card_holder','designation','mob_no','email','website','area','city','state','pincode'])
+
+        st.write(result)
+  if select=='DELETE':
+    cursor.execute("SELECT card_holder FROM card_data")
+    result = cursor.fetchall()
+    business_cards = {}
+    for row in result:
+      business_cards[row[0]] = row[0]
+    options = ["None"] + list(business_cards.keys())
+    selected_card = st.selectbox("**Select a card**", options)
+    if selected_card == "None":
+      st.write("No card selected.")
+    else:
+      st.write(f"### You have selected :green[**{selected_card}'s**] card to delete")
+      st.write("#### Proceed to delete this card?")
+      if st.button("Yes Delete Business Card"):
+        cursor.execute(f"DELETE FROM card_data WHERE card_holder='{selected_card}'")
+        conn.commit()
+        st.success("Business card information deleted")
+      elif st.button("Cancel"):
+        st.write("Deletion cancelled")
+
+
 #
 
 !npm install localtunnel
